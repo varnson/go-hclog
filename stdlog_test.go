@@ -81,52 +81,52 @@ func TestStdlogAdapter_ForceLevel(t *testing.T) {
 			name:       "force error",
 			forceLevel: Error,
 			write:      "this is a test",
-			expect:     "[ERROR] test: this is a test\n",
+			expect:     "[ERROR] [module=test] -- this is a test\n",
 		},
 		{
 			name:        "force error overrides infer",
 			forceLevel:  Error,
 			inferLevels: true,
 			write:       "[DEBUG] this is a test",
-			expect:      "[ERROR] test: this is a test\n",
+			expect:      "[ERROR] [module=test] -- this is a test\n",
 		},
 		{
 			name:       "force error and strip debug",
 			forceLevel: Error,
 			write:      "[DEBUG] this is a test",
-			expect:     "[ERROR] test: this is a test\n",
+			expect:     "[ERROR] [module=test] -- this is a test\n",
 		},
 		{
 			name:       "force trace",
 			forceLevel: Trace,
 			write:      "this is a test",
-			expect:     "[TRACE] test: this is a test\n",
+			expect:     "[TRACE] [module=test] -- this is a test\n",
 		},
 		{
 			name:       "force trace and strip higher level error",
 			forceLevel: Trace,
 			write:      "[WARN] this is a test",
-			expect:     "[TRACE] test: this is a test\n",
+			expect:     "[TRACE] [module=test] -- this is a test\n",
 		},
 		{
 			name:       "force with invalid level",
 			forceLevel: -10,
 			write:      "this is a test",
-			expect:     "[INFO]  test: this is a test\n",
+			expect:     "[INFO]  [module=test] -- this is a test\n",
 		},
 		{
 			name:        "infer debug",
 			forceLevel:  NoLevel,
 			inferLevels: true,
 			write:       "[DEBUG] debug info",
-			expect:      "[DEBUG] test: debug info\n",
+			expect:      "[DEBUG] [module=test] -- debug info\n",
 		},
 		{
 			name:        "info is used if not forced and cannot infer",
 			forceLevel:  NoLevel,
 			inferLevels: false,
 			write:       "some message",
-			expect:      "[INFO]  test: some message\n",
+			expect:      "[INFO]  [module=test] -- some message\n",
 		},
 	}
 
@@ -174,7 +174,7 @@ func TestFromStandardLogger(t *testing.T) {
 
 	actual := buf.String()
 	suffix := fmt.Sprintf(
-		"[INFO]  go-hclog/%s:%d: hclog-inner: this is a test: name=tester count=1\n",
+		"[INFO] [go-hclog/%s:%d] [module=hclog-inner] -- this is a test: name=tester count=1\n",
 		filepath.Base(file), line-1)
 	require.Equal(t, suffix, actual[25:])
 

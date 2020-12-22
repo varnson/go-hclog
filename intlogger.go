@@ -223,10 +223,10 @@ func (l *intLogger) logPlain(t time.Time, name string, level Level, msg string, 
 		l.writer.WriteString("module")
 		l.writer.WriteByte('=')
 		l.writer.WriteString(name)
-		l.writer.WriteByte(']')
+		l.writer.WriteString("] ")
 	}
 
-	l.writer.WriteString(" -- ")
+	l.writer.WriteString("-- ")
 
 	l.writer.WriteString(msg)
 

@@ -7,6 +7,7 @@ require (
 	github.com/mattn/go-isatty v0.0.10
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/testify v1.2.2
+	github.com/hashicorp/logutils v1.0.0
 )
 
 go 1.13

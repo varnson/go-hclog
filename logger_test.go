@@ -49,7 +49,7 @@ func TestLogger(t *testing.T) {
 		dataIdx := strings.IndexByte(str, ' ')
 		rest := str[dataIdx+1:]
 
-		assert.Equal(t, "[INFO]  test: this is test: who=programmer why=testing\n", rest)
+		assert.Equal(t, "[INFO]  [module=test] -- this is test: who=programmer why=testing\n", rest)
 	})
 
 	t.Run("formats log entries", func(t *testing.T) {
@@ -66,7 +66,7 @@ func TestLogger(t *testing.T) {
 		dataIdx := strings.IndexByte(str, ' ')
 		rest := str[dataIdx+1:]
 
-		assert.Equal(t, "[INFO]  test: this is test: who=programmer why=testing\n", rest)
+		assert.Equal(t, "[INFO]  [module=test] -- this is test: who=programmer why=testing\n", rest)
 	})
 
 	t.Run("renders slice values specially", func(t *testing.T) {
@@ -83,7 +83,7 @@ func TestLogger(t *testing.T) {
 		dataIdx := strings.IndexByte(str, ' ')
 		rest := str[dataIdx+1:]
 
-		assert.Equal(t, "[INFO]  test: this is test: who=programmer why=[testing, dev, 1, 5, \"[3 4]\"]\n", rest)
+		assert.Equal(t, "[INFO]  [module=test] -- this is test: who=programmer why=[testing, dev, 1, 5, \"[3 4]\"]\n", rest)
 	})
 
 	t.Run("renders values in slices with quotes if needed", func(t *testing.T) {
@@ -100,7 +100,7 @@ func TestLogger(t *testing.T) {
 		dataIdx := strings.IndexByte(str, ' ')
 		rest := str[dataIdx+1:]
 
-		assert.Equal(t, "[INFO]  test: this is test: who=programmer why=[\"testing & qa\", dev]\n", rest)
+		assert.Equal(t, "[INFO]  [module=test] -- this is test: who=programmer why=[\"testing & qa\", dev]\n", rest)
 	})
 
 	t.Run("outputs stack traces", func(t *testing.T) {
@@ -116,7 +116,7 @@ func TestLogger(t *testing.T) {
 		lines := strings.Split(buf.String(), "\n")
 		require.True(t, len(lines) > 1)
 
-		assert.Equal(t, "github.com/hashicorp/go-hclog.Stacktrace", lines[1])
+		assert.Equal(t, "github.com/varnson/go-hclog.Stacktrace", lines[1])
 	})
 
 	t.Run("outputs stack traces with it's given a name", func(t *testing.T) {
@@ -132,7 +132,7 @@ func TestLogger(t *testing.T) {
 		lines := strings.Split(buf.String(), "\n")
 		require.True(t, len(lines) > 1)
 
-		assert.Equal(t, "github.com/hashicorp/go-hclog.Stacktrace", lines[1])
+		assert.Equal(t, "github.com/varnson/go-hclog.Stacktrace", lines[1])
 	})
 
 	t.Run("includes the caller location", func(t *testing.T) {
@@ -151,7 +151,7 @@ func TestLogger(t *testing.T) {
 		rest := str[dataIdx+1:]
 
 		// This test will break if you move this around, it's line dependent, just fyi
-		assert.Equal(t, "[INFO]  go-hclog/logger_test.go:147: test: this is test: who=programmer why=\"testing is fun\"\n", rest)
+		assert.Equal(t, "[INFO] [go-hclog/logger_test.go:147] [module=test] -- this is test: who=programmer why=\"testing is fun\"\n", rest)
 	})
 
 	t.Run("prefixes the name", func(t *testing.T) {
@@ -166,7 +166,7 @@ func TestLogger(t *testing.T) {
 		str := buf.String()
 		dataIdx := strings.IndexByte(str, ' ')
 		rest := str[dataIdx+1:]
-		assert.Equal(t, "[INFO]  this is test\n", rest)
+		assert.Equal(t, "[INFO]  -- this is test\n", rest)
 
 		buf.Reset()
 
@@ -175,7 +175,7 @@ func TestLogger(t *testing.T) {
 		str = buf.String()
 		dataIdx = strings.IndexByte(str, ' ')
 		rest = str[dataIdx+1:]
-		assert.Equal(t, "[INFO]  sublogger: this is test\n", rest)
+		assert.Equal(t, "[INFO]  [module=sublogger] -- this is test\n", rest)
 	})
 
 	t.Run("use a different time format", func(t *testing.T) {
@@ -215,14 +215,14 @@ func TestLogger(t *testing.T) {
 		derived1.Info("test1")
 		output := buf.String()
 		dataIdx := strings.IndexByte(output, ' ')
-		assert.Equal(t, "[INFO]  with_test: test1: a=1 b=2 c=3 cat=30\n", output[dataIdx+1:])
+		assert.Equal(t, "[INFO]  [module=with_test] -- test1: a=1 b=2 c=3 cat=30\n", output[dataIdx+1:])
 
 		buf.Reset()
 
 		derived2.Info("test2")
 		output = buf.String()
 		dataIdx = strings.IndexByte(output, ' ')
-		assert.Equal(t, "[INFO]  with_test: test2: a=1 b=2 c=3 dog=40\n", output[dataIdx+1:])
+		assert.Equal(t, "[INFO]  [module=with_test] -- test2: a=1 b=2 c=3 dog=40\n", output[dataIdx+1:])
 	})
 
 	t.Run("unpaired with", func(t *testing.T) {
@@ -237,7 +237,7 @@ func TestLogger(t *testing.T) {
 		derived1.Info("test1")
 		output := buf.String()
 		dataIdx := strings.IndexByte(output, ' ')
-		assert.Equal(t, "[INFO]  with_test: test1: EXTRA_VALUE_AT_END=a\n", output[dataIdx+1:])
+		assert.Equal(t, "[INFO]  [module=with_test] -- test1: EXTRA_VALUE_AT_END=a\n", output[dataIdx+1:])
 	})
 
 	t.Run("use with and log", func(t *testing.T) {
@@ -262,14 +262,14 @@ func TestLogger(t *testing.T) {
 		rootLogger.Info("root_test", "bird", 10)
 		output := buf.String()
 		dataIdx := strings.IndexByte(output, ' ')
-		assert.Equal(t, "[INFO]  with_test: root_test: a=1 b=2 c=3 bird=10\n", output[dataIdx+1:])
+		assert.Equal(t, "[INFO]  [module=with_test] -- root_test: a=1 b=2 c=3 bird=10\n", output[dataIdx+1:])
 
 		buf.Reset()
 
 		derived.Info("derived_test")
 		output = buf.String()
 		dataIdx = strings.IndexByte(output, ' ')
-		assert.Equal(t, "[INFO]  with_test: derived_test: a=1 b=2 c=3 cat=30\n", output[dataIdx+1:])
+		assert.Equal(t, "[INFO]  [module=with_test] -- derived_test: a=1 b=2 c=3 cat=30\n", output[dataIdx+1:])
 	})
 
 	t.Run("use with and log and change levels", func(t *testing.T) {
@@ -308,14 +308,14 @@ func TestLogger(t *testing.T) {
 		rootLogger.Info("root_test", "bird", 10)
 		output = buf.String()
 		dataIdx := strings.IndexByte(output, ' ')
-		assert.Equal(t, "[INFO]  with_test: root_test: a=1 b=2 c=3 bird=10\n", output[dataIdx+1:])
+		assert.Equal(t, "[INFO]  [module=with_test] -- root_test: a=1 b=2 c=3 bird=10\n", output[dataIdx+1:])
 
 		buf.Reset()
 
 		derived.Info("derived_test")
 		output = buf.String()
 		dataIdx = strings.IndexByte(output, ' ')
-		assert.Equal(t, "[INFO]  with_test: derived_test: a=1 b=2 c=3 cat=30\n", output[dataIdx+1:])
+		assert.Equal(t, "[INFO]  [module=with_test] -- derived_test: a=1 b=2 c=3 cat=30\n", output[dataIdx+1:])
 	})
 
 	t.Run("supports Printf style expansions when requested", func(t *testing.T) {
@@ -332,7 +332,7 @@ func TestLogger(t *testing.T) {
 		dataIdx := strings.IndexByte(str, ' ')
 		rest := str[dataIdx+1:]
 
-		assert.Equal(t, "[INFO]  test: this is test: production=\"12 beans/day\"\n", rest)
+		assert.Equal(t, "[INFO]  [module=test] -- this is test: production=\"12 beans/day\"\n", rest)
 	})
 
 	t.Run("supports number formating", func(t *testing.T) {
@@ -349,7 +349,7 @@ func TestLogger(t *testing.T) {
 		dataIdx := strings.IndexByte(str, ' ')
 		rest := str[dataIdx+1:]
 
-		assert.Equal(t, "[INFO]  test: this is test: bytes=0xc perms=0755 bits=0b101\n", rest)
+		assert.Equal(t, "[INFO]  [module=test] -- this is test: bytes=0xc perms=0755 bits=0b101\n", rest)
 	})
 
 	t.Run("supports resetting the output", func(t *testing.T) {
@@ -365,7 +365,7 @@ func TestLogger(t *testing.T) {
 		dataIdx := strings.IndexByte(str, ' ')
 		rest := str[dataIdx+1:]
 
-		assert.Equal(t, "[INFO]  this is test: production=\"12 beans/day\"\n", rest)
+		assert.Equal(t, "[INFO]  -- this is test: production=\"12 beans/day\"\n", rest)
 
 		logger.(OutputResettable).ResetOutput(&LoggerOptions{
 			Output: &second,
@@ -376,12 +376,12 @@ func TestLogger(t *testing.T) {
 		str = first.String()
 		dataIdx = strings.IndexByte(str, ' ')
 		rest = str[dataIdx+1:]
-		assert.Equal(t, "[INFO]  this is test: production=\"12 beans/day\"\n", rest)
+		assert.Equal(t, "[INFO]  -- this is test: production=\"12 beans/day\"\n", rest)
 
 		str = second.String()
 		dataIdx = strings.IndexByte(str, ' ')
 		rest = str[dataIdx+1:]
-		assert.Equal(t, "[INFO]  this is another test: production=\"13 beans/day\"\n", rest)
+		assert.Equal(t, "[INFO]  -- this is another test: production=\"13 beans/day\"\n", rest)
 	})
 
 	t.Run("supports resetting the output with flushing", func(t *testing.T) {
@@ -406,12 +406,12 @@ func TestLogger(t *testing.T) {
 		str = first.String()
 		dataIdx := strings.IndexByte(str, ' ')
 		rest := str[dataIdx+1:]
-		assert.Equal(t, "[INFO]  this is test: production=\"12 beans/day\"\n", rest)
+		assert.Equal(t, "[INFO]  -- this is test: production=\"12 beans/day\"\n", rest)
 
 		str = second.String()
 		dataIdx = strings.IndexByte(str, ' ')
 		rest = str[dataIdx+1:]
-		assert.Equal(t, "[INFO]  this is another test: production=\"13 beans/day\"\n", rest)
+		assert.Equal(t, "[INFO]  -- this is another test: production=\"13 beans/day\"\n", rest)
 	})
 
 	t.Run("named logger with disabled parent", func(t *testing.T) {
@@ -438,7 +438,7 @@ func TestLogger(t *testing.T) {
 		str = buf.String()
 		dataIdx := strings.IndexByte(str, ' ')
 		rest := str[dataIdx+1:]
-		assert.Equal(t, "[INFO]  sublogger: this is test\n", rest)
+		assert.Equal(t, "[INFO]  [module=sublogger] -- this is test\n", rest)
 
 		buf.Reset()
 		logger.Info("parent should still be quiet")
@@ -465,7 +465,7 @@ func TestLogger_leveledWriter(t *testing.T) {
 		errDataIdx := strings.IndexByte(errStr, ' ')
 		errRest := errStr[errDataIdx+1:]
 
-		assert.Equal(t, "[ERROR] test: this is an error: who=programmer why=testing\n", errRest)
+		assert.Equal(t, "[ERROR] [module=test] -- this is an error: who=programmer why=testing\n", errRest)
 	})
 
 	t.Run("writes non-errors to stdout", func(t *testing.T) {
@@ -483,7 +483,7 @@ func TestLogger_leveledWriter(t *testing.T) {
 		outDataIdx := strings.IndexByte(outStr, ' ')
 		outRest := outStr[outDataIdx+1:]
 
-		assert.Equal(t, "[INFO]  test: this is test: who=programmer why=testing\n", outRest)
+		assert.Equal(t, "[INFO]  [module=test] -- this is test: who=programmer why=testing\n", outRest)
 	})
 
 	t.Run("writes errors and non-errors correctly", func(t *testing.T) {
@@ -506,8 +506,8 @@ func TestLogger_leveledWriter(t *testing.T) {
 		outDataIdx := strings.IndexByte(outStr, ' ')
 		outRest := outStr[outDataIdx+1:]
 
-		assert.Equal(t, "[ERROR] test: this is an error: who=programmer why=testing\n", errRest)
-		assert.Equal(t, "[INFO]  test: this is test: who=programmer why=testing\n", outRest)
+		assert.Equal(t, "[ERROR] [module=test] -- this is an error: who=programmer why=testing\n", errRest)
+		assert.Equal(t, "[INFO]  [module=test] -- this is test: who=programmer why=testing\n", outRest)
 	})
 }
 

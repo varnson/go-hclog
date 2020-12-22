@@ -36,7 +36,7 @@ func TestInterceptLogger(t *testing.T) {
 		dataIdx := strings.IndexByte(str, ' ')
 		rest := str[dataIdx+1:]
 
-		assert.Equal(t, "[DEBUG] test log: who=programmer\n", rest)
+		assert.Equal(t, "[DEBUG] -- test log: who=programmer\n", rest)
 
 	})
 
@@ -65,14 +65,14 @@ func TestInterceptLogger(t *testing.T) {
 		dataIdx := strings.IndexByte(output, ' ')
 		rest := output[dataIdx+1:]
 
-		assert.Equal(t, "[INFO]  with_test: test1: a=1 b=2 c=3\n", rest)
+		assert.Equal(t, "[INFO]  [module=with_test] -- test1: a=1 b=2 c=3\n", rest)
 
 		// Ensure intercept works
 		output = sbuf.String()
 		dataIdx = strings.IndexByte(output, ' ')
 		rest = output[dataIdx+1:]
 
-		assert.Equal(t, "[INFO]  with_test: test1: a=1 b=2 c=3\n", rest)
+		assert.Equal(t, "[INFO]  [module=with_test] -- test1: a=1 b=2 c=3\n", rest)
 	})
 
 	t.Run("sink includes name", func(t *testing.T) {
@@ -99,14 +99,14 @@ func TestInterceptLogger(t *testing.T) {
 		dataIdx := strings.IndexByte(output, ' ')
 		rest := output[dataIdx+1:]
 
-		assert.Equal(t, "[INFO]  with_test.http: test1\n", rest)
+		assert.Equal(t, "[INFO]  [module=with_test.http] -- test1\n", rest)
 
 		// Ensure intercept works
 		output = sbuf.String()
 		dataIdx = strings.IndexByte(output, ' ')
 		rest = output[dataIdx+1:]
 
-		assert.Equal(t, "[INFO]  with_test.http: test1\n", rest)
+		assert.Equal(t, "[INFO]  [module=with_test.http] -- test1\n", rest)
 	})
 
 	t.Run("intercepting logger can create logger with reset name", func(t *testing.T) {
@@ -133,14 +133,14 @@ func TestInterceptLogger(t *testing.T) {
 		dataIdx := strings.IndexByte(output, ' ')
 		rest := output[dataIdx+1:]
 
-		assert.Equal(t, "[INFO]  http: test1\n", rest)
+		assert.Equal(t, "[INFO]  [module=http] -- test1\n", rest)
 
 		// Ensure intercept works
 		output = sbuf.String()
 		dataIdx = strings.IndexByte(output, ' ')
 		rest = output[dataIdx+1:]
 
-		assert.Equal(t, "[INFO]  http: test1\n", rest)
+		assert.Equal(t, "[INFO]  [module=http] -- test1\n", rest)
 	})
 
 	t.Run("Intercepting logger sink can deregister itself", func(t *testing.T) {
@@ -193,7 +193,7 @@ func TestInterceptLogger(t *testing.T) {
 		dataIdx := strings.IndexByte(output, ' ')
 		rest := output[dataIdx+1:]
 
-		expected := fmt.Sprintf("[INFO]  go-hclog/interceptlogger_test.go:%d: this is a test: who=caller\n", line-1)
+		expected := fmt.Sprintf("[INFO] [go-hclog/interceptlogger_test.go:%d] -- this is a test: who=caller\n", line-1)
 		assert.Equal(t, expected, rest)
 
 		b := sbuf.Bytes()
@@ -234,7 +234,7 @@ func TestInterceptLogger(t *testing.T) {
 		output := buf.String()
 		dataIdx := strings.IndexByte(output, ' ')
 		rest := output[dataIdx+1:]
-		assert.Equal(t, "[DEBUG] with_test.sub_logger.http: test1: parent=logger path=/some/test/path args=[test, test]\n", rest)
+		assert.Equal(t, "[DEBUG] [module=with_test.sub_logger.http] -- test1: parent=logger path=/some/test/path args=[test, test]\n", rest)
 	})
 
 	t.Run("derived standard loggers send output to sinks", func(t *testing.T) {
@@ -261,12 +261,12 @@ func TestInterceptLogger(t *testing.T) {
 		output := buf.String()
 		dataIdx := strings.IndexByte(output, ' ')
 		rest := output[dataIdx+1:]
-		assert.Equal(t, "[DEBUG] with_name: test log\n", rest)
+		assert.Equal(t, "[DEBUG] [module=with_name] -- test log\n", rest)
 
 		output = sbuf.String()
 		dataIdx = strings.IndexByte(output, ' ')
 		rest = output[dataIdx+1:]
-		assert.Equal(t, "[DEBUG] with_name: test log\n", rest)
+		assert.Equal(t, "[DEBUG] [module=with_name] -- test log\n", rest)
 	})
 
 	t.Run("includes the caller location", func(t *testing.T) {
@@ -295,7 +295,7 @@ func TestInterceptLogger(t *testing.T) {
 		dataIdx := strings.IndexByte(str, ' ')
 		rest := str[dataIdx+1:]
 
-		expected := fmt.Sprintf("[INFO]  go-hclog/interceptlogger_test.go:%d: test: this is test: who=programmer why=\"testing is fun\"\n", line-1)
+		expected := fmt.Sprintf("[INFO] [go-hclog/interceptlogger_test.go:%d] [module=test] -- this is test: who=programmer why=\"testing is fun\"\n", line-1)
 		assert.Equal(t, expected, rest)
 
 		str = sbuf.String()
@@ -317,7 +317,7 @@ func TestInterceptLogger(t *testing.T) {
 		dataIdx := strings.IndexByte(str, ' ')
 		rest := str[dataIdx+1:]
 
-		assert.Equal(t, "[INFO]  this is test: production=\"12 beans/day\"\n", rest)
+		assert.Equal(t, "[INFO]  -- this is test: production=\"12 beans/day\"\n", rest)
 
 		logger.(OutputResettable).ResetOutput(&LoggerOptions{
 			Output: &second,
@@ -328,12 +328,12 @@ func TestInterceptLogger(t *testing.T) {
 		str = first.String()
 		dataIdx = strings.IndexByte(str, ' ')
 		rest = str[dataIdx+1:]
-		assert.Equal(t, "[INFO]  this is test: production=\"12 beans/day\"\n", rest)
+		assert.Equal(t, "[INFO]  -- this is test: production=\"12 beans/day\"\n", rest)
 
 		str = second.String()
 		dataIdx = strings.IndexByte(str, ' ')
 		rest = str[dataIdx+1:]
-		assert.Equal(t, "[INFO]  this is another test: production=\"13 beans/day\"\n", rest)
+		assert.Equal(t, "[INFO]  -- this is another test: production=\"13 beans/day\"\n", rest)
 	})
 
 	t.Run("supports resetting the output with flushing", func(t *testing.T) {
@@ -358,11 +358,11 @@ func TestInterceptLogger(t *testing.T) {
 		str = first.String()
 		dataIdx := strings.IndexByte(str, ' ')
 		rest := str[dataIdx+1:]
-		assert.Equal(t, "[INFO]  this is test: production=\"12 beans/day\"\n", rest)
+		assert.Equal(t, "[INFO]  -- this is test: production=\"12 beans/day\"\n", rest)
 
 		str = second.String()
 		dataIdx = strings.IndexByte(str, ' ')
 		rest = str[dataIdx+1:]
-		assert.Equal(t, "[INFO]  this is another test: production=\"13 beans/day\"\n", rest)
+		assert.Equal(t, "[INFO]  -- this is another test: production=\"13 beans/day\"\n", rest)
 	})
 }
