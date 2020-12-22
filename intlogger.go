@@ -208,20 +208,25 @@ func (l *intLogger) logPlain(t time.Time, name string, level Level, msg string, 
 
 	if l.callerOffset > 0 {
 		if _, file, line, ok := runtime.Caller(l.callerOffset); ok {
-			l.writer.WriteByte(' ')
+			l.writer.WriteByte('[')
 			l.writer.WriteString(trimCallerPath(file))
 			l.writer.WriteByte(':')
 			l.writer.WriteString(strconv.Itoa(line))
-			l.writer.WriteByte(':')
+			l.writer.WriteByte(']')
 		}
 	}
 
 	l.writer.WriteByte(' ')
 
 	if name != "" {
+		l.writer.WriteByte('[')
+		l.writer.WriteString("module")
+		l.writer.WriteByte('=')
 		l.writer.WriteString(name)
-		l.writer.WriteString(": ")
+		l.writer.WriteByte(']')
 	}
+
+	l.writer.WriteString(" -- ")
 
 	l.writer.WriteString(msg)
 

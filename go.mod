@@ -1,4 +1,4 @@
-module github.com/hashicorp/go-hclog
+module github.com/varnson/go-hclog
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
