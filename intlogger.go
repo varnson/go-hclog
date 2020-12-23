@@ -650,9 +650,10 @@ func (l *intLogger) StandardWriter(opts *StandardLoggerOptions) io.Writer {
 		level:             l.level,
 		exclude:           l.exclude,
 		independentLevels: l.independentLevels,
+		implied:           l.implied,
 	}
 	if l.callerOffset > 0 {
-		l.callerOffset += 4
+		newLog.callerOffset = l.callerOffset + 4
 	}
 
 	return &stdlogAdapter{
